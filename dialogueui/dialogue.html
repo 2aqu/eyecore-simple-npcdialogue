@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPC Dialogue</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .dialogue-box {
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 400px;
+            margin: auto;
+        }
+        .npc-image {
+            max-width: 100px;
+            border-radius: 50%;
+        }
+        .dialogue-options {
+            margin-top: 10px;
+        }
+        .option-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .option-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="dialogue-box">
+        <img src="npc_image.png" class="npc-image"><br><br>
+        <div id="dialogue-text">
+            NPC: Select an option...
+        </div>
+        <div class="dialogue-options" id="dialogue-options">
+            <button class="option-button" id="option-yes">Yes</button>
+            <button class="option-button" id="option-no">No</button>
+        </div>
+    </div>
+    <script>
+        document.getElementById('option-yes').addEventListener('click', function() {
+            sendResponse('yes');
+        });
+
+        document.getElementById('option-no').addEventListener('click', function() {
+            sendResponse('no');
+        });
+
+        function sendResponse(response) {
+            fetch(`http://${GetParentResourceName()}/npc_response`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=UTF-8',
+                },
+                body: JSON.stringify({ response: response })
+            }).then(function(response) {
+                if (response.ok) {
+                    closeDialogue();
+                }
+            });
+        }
+
+        function closeDialogue() {
+            fetch(`http://${GetParentResourceName()}/close_dialogue`, {
+                method: 'POST'
+            }).then(function(response) {
+                if (response.ok) {
+                    console.log('Dialogue closed');
+                }
+            });
+        }
+
+        window.addEventListener('load', function() {
+            const dialogueData = JSON.parse(`{{dialogueData}}`);
+            document.getElementById('dialogue-text').textContent = `NPC: ${dialogueData.npcDialogs[Math.floor(Math.random() * dialogueData.npcDialogs.length)]}`;
+        });
+    </script>
+</body>
+</html>
